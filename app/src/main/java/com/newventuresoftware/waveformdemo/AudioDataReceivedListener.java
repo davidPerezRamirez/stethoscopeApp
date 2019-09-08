@@ -15,5 +15,5 @@
 package com.newventuresoftware.waveformdemo;
 
 public interface AudioDataReceivedListener {
-    void onAudioDataReceived(short[] data);
+    void onAudioDataReceived(byte[] data);
 }

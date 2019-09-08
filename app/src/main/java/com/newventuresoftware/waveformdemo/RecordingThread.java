@@ -19,9 +19,17 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
+
 public class RecordingThread {
     private static final String LOG_TAG = RecordingThread.class.getSimpleName();
     private static final int SAMPLE_RATE = 44100;
+
+    private ByteArrayOutputStream trackRecord;
+
+    public ByteArrayOutputStream getTrackRecord() {
+        return trackRecord;
+    }
 
     public RecordingThread(AudioDataReceivedListener listener) {
         mListener = listener;
@@ -40,6 +48,7 @@ public class RecordingThread {
             return;
 
         mShouldContinue = true;
+        this.clearTrackRecord();
         mThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -47,6 +56,10 @@ public class RecordingThread {
             }
         });
         mThread.start();
+    }
+
+    private void clearTrackRecord() {
+        this.trackRecord = new ByteArrayOutputStream();
     }
 
     public void stopRecording() {
@@ -70,8 +83,7 @@ public class RecordingThread {
             bufferSize = SAMPLE_RATE * 2;
         }
 
-        short[] audioBuffer = new short[bufferSize / 2];
-
+        byte[] audioBuffer = new byte[bufferSize / 2];
         AudioRecord record = new AudioRecord(MediaRecorder.AudioSource.DEFAULT,
                 SAMPLE_RATE,
                 AudioFormat.CHANNEL_IN_MONO,
@@ -93,6 +105,9 @@ public class RecordingThread {
 
             // Notify waveform
             mListener.onAudioDataReceived(audioBuffer);
+
+            getTrackRecord().write(audioBuffer, 0, audioBuffer.length);
+
         }
 
         record.stop();
@@ -100,4 +115,5 @@ public class RecordingThread {
 
         Log.v(LOG_TAG, String.format("Recording stopped. Samples read: %d", shortsRead));
     }
+
 }
