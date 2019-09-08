@@ -22,8 +22,11 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:27.1.1'
-    compile "commons-io:commons-io:+"
-    compile 'com.android.support:design:27.1.1'
-    compile project (':waveform')
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation "commons-io:commons-io:+"
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+
+    implementation project (':waveform')
 }
