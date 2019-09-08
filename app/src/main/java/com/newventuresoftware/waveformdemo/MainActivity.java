@@ -23,93 +23,63 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.newventuresoftware.waveform.WaveformView;
 
 import org.apache.commons.io.IOUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity {
 
-    private WaveformView mRealtimeWaveformView;
+    private static final int REQUEST_RECORD_AUDIO = 13;
+
+    @BindView(R.id.waveformView)
+    WaveformView mRealtimeWaveformView;
+    @BindView(R.id.playbackWaveformView)
+    WaveformView mPlaybackView;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
+    @BindView(R.id.playFab)
+    FloatingActionButton playFab;
+
     private RecordingThread mRecordingThread;
     private PlaybackThread mPlaybackThread;
-    private static final int REQUEST_RECORD_AUDIO = 13;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
-        mRealtimeWaveformView = (WaveformView) findViewById(R.id.waveformView);
         mRecordingThread = new RecordingThread(new AudioDataReceivedListener() {
             @Override
-            public void onAudioDataReceived(short[] data) {
-                mRealtimeWaveformView.setSamples(data);
+            public void onAudioDataReceived(byte[] data) {
+                short[] buffer = convertArrayByteToArrayShort(data);
+                mRealtimeWaveformView.setSamples(buffer);
             }
         });
 
-        final WaveformView mPlaybackView = (WaveformView) findViewById(R.id.playbackWaveformView);
-
         this.initializeRecordButton();
-
-        short[] samples = null;
-        try {
-            if (mRealtimeWaveformView.getSamples() == null || mRealtimeWaveformView.getSamples().length <= 0) {
-                samples = getAudioSample();
-            } else {
-                samples = mRealtimeWaveformView.getSamples();
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (samples != null) {
-            final FloatingActionButton playFab = (FloatingActionButton) findViewById(R.id.playFab);
-
-            mPlaybackThread = new PlaybackThread(samples, new PlaybackListener() {
-                @Override
-                public void onProgress(int progress) {
-                    mPlaybackView.setMarkerPosition(progress);
-                }
-                @Override
-                public void onCompletion() {
-                    mPlaybackView.setMarkerPosition(mPlaybackView.getAudioLength());
-                    playFab.setImageResource(android.R.drawable.ic_media_play);
-                }
-            });
-            mPlaybackView.setChannels(1);
-            mPlaybackView.setSampleRate(PlaybackThread.SAMPLE_RATE);
-            mPlaybackView.setSamples(samples);
-
-            playFab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (!mPlaybackThread.playing()) {
-                        mPlaybackThread.startPlayback();
-                        playFab.setImageResource(android.R.drawable.ic_media_pause);
-                    } else {
-                        mPlaybackThread.stopPlayback();
-                        playFab.setImageResource(android.R.drawable.ic_media_play);
-                    }
-                }
-            });
-        }
+        this.initializePlayRecord();
     }
 
     private void initializeRecordButton() {
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -117,7 +87,53 @@ public class MainActivity extends AppCompatActivity {
                     startAudioRecordingSafe();
                 } else {
                     mRecordingThread.stopRecording();
+                    initializePlayRecord();
+                    mPlaybackView.invalidate();
                 }
+            }
+        });
+    }
+
+    private void initializePlayRecord() {
+        short[] samples = null;
+
+        try {
+            samples = getAudioSample();
+        } catch (IOException ex) {
+            Log.e("**initializePlayRecord*", ex.getMessage());
+        }
+        mPlaybackThread = this.createPlaybackThread(samples, mPlaybackView, playFab);
+        mPlaybackView.setChannels(1);
+        mPlaybackView.setSampleRate(PlaybackThread.SAMPLE_RATE);
+        mPlaybackView.setSamples(samples);
+
+        playFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mPlaybackThread.playing()) {
+                    mPlaybackThread.startPlayback();
+                    playFab.setImageResource(android.R.drawable.ic_media_pause);
+                } else {
+                    mPlaybackThread.stopPlayback();
+                    playFab.setImageResource(android.R.drawable.ic_media_play);
+                }
+            }
+        });
+    }
+
+    private PlaybackThread createPlaybackThread(short[] samples, final WaveformView mPlaybackView,
+                                                final FloatingActionButton playFab) {
+
+        return new PlaybackThread(samples, new PlaybackListener() {
+            @Override
+            public void onProgress(int progress) {
+                mPlaybackView.setMarkerPosition(progress);
+            }
+
+            @Override
+            public void onCompletion() {
+                mPlaybackView.setMarkerPosition(mPlaybackView.getAudioLength());
+                playFab.setImageResource(android.R.drawable.ic_media_play);
             }
         });
     }
@@ -130,20 +146,37 @@ public class MainActivity extends AppCompatActivity {
         mPlaybackThread.stopPlayback();
     }
 
-    private short[] getAudioSample() throws IOException{
-        InputStream is = getResources().openRawResource(R.raw.jinglebells);
+    private short[] getAudioSample() throws IOException {
         byte[] data;
-        try {
-            data = IOUtils.toByteArray(is);
-        } finally {
-            if (is != null) {
-                is.close();
+
+        if (mRecordingThread.getTrackRecord() == null) {
+            InputStream is = getResources().openRawResource(R.raw.jinglebells);
+
+            try {
+                data = IOUtils.toByteArray(is);
+            } finally {
+                if (is != null) {
+                    is.close();
+                }
             }
+        } else {
+            ByteArrayOutputStream buffer = mRecordingThread.getTrackRecord();
+
+            data = buffer.toByteArray();
         }
 
         ShortBuffer sb = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
         short[] samples = new short[sb.limit()];
         sb.get(samples);
+        return samples;
+    }
+
+    public short[] convertArrayByteToArrayShort(byte[] data) {
+        ShortBuffer sb = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
+        short[] samples = new short[sb.limit()];
+
+        sb.get(samples);
+
         return samples;
     }
 
@@ -173,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
                 == PackageManager.PERMISSION_GRANTED) {
             mRecordingThread.startRecording();
+
         } else {
             requestMicrophonePermission();
         }
@@ -204,3 +238,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
