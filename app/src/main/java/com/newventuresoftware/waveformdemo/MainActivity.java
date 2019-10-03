@@ -126,8 +126,8 @@ public class MainActivity extends AppCompatActivity {
 
         return new PlaybackThread(samples, new PlaybackListener() {
             @Override
-            public void onProgress(int progress) {
-                mPlaybackView.setMarkerPosition(progress);
+            public void onProgress(int progressInMiliseconds) {
+                mPlaybackView.setMarkerPosition(progressInMiliseconds);
             }
 
             @Override

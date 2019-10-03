@@ -81,7 +81,7 @@ public class WaveformView extends View {
         mTextPaint = new TextPaint();
         mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
-                mTextPaint.setColor(mTextColor);
+        mTextPaint.setColor(mTextColor);
         mTextPaint.setTextSize(TextUtils.getFontSize(getContext(),
                 android.R.attr.textAppearanceSmall));
 
@@ -171,6 +171,10 @@ public class WaveformView extends View {
         postInvalidate();
     }
 
+    /**
+     *
+     * @return = duration of audio in miliseconds
+     */
     public int getAudioLength() {
         return mAudioLength;
     }
