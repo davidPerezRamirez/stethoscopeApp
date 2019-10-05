@@ -12,19 +12,19 @@
  * the License.
  */
 
-package com.newventuresoftware.waveformdemo;
+package com.newventuresoftware.waveformdemo.theard;
 
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
+
+import com.newventuresoftware.waveformdemo.listener.PlaybackListener;
 
 import java.nio.ShortBuffer;
 
 public class PlaybackThread {
-    static final int SAMPLE_RATE = 44100;
+    public static final int SAMPLE_RATE = 44100;
     private static final String LOG_TAG = PlaybackThread.class.getSimpleName();
 
     public PlaybackThread(short[] samples, PlaybackListener listener) {

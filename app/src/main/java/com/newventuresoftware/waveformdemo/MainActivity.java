@@ -29,6 +29,10 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.newventuresoftware.waveform.WaveformView;
+import com.newventuresoftware.waveformdemo.listener.AudioDataReceivedListener;
+import com.newventuresoftware.waveformdemo.listener.PlaybackListener;
+import com.newventuresoftware.waveformdemo.theard.PlaybackThread;
+import com.newventuresoftware.waveformdemo.theard.RecordingThread;
 
 import org.apache.commons.io.IOUtils;
 

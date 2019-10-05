@@ -12,12 +12,14 @@
  * the License.
  */
 
-package com.newventuresoftware.waveformdemo;
+package com.newventuresoftware.waveformdemo.theard;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
+
+import com.newventuresoftware.waveformdemo.listener.AudioDataReceivedListener;
 
 import java.io.ByteArrayOutputStream;
 
