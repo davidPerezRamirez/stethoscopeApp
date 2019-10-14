@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         byte[] data;
 
         if (mRecordingThread.getTrackRecord() == null) {
-            InputStream is = getResources().openRawResource(R.raw.jinglebells);
+            InputStream is = getResources().openRawResource(R.raw.pulsacion);
 
             try {
                 data = IOUtils.toByteArray(is);
