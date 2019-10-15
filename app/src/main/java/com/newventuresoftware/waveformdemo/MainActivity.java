@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e("**initializePlayRecord*", ex.getMessage());
         }
         mPlaybackThread = this.createPlaybackThread(samples, mPlaybackView, playFab);
-        mPlaybackView.setChannels(1);
+        mPlaybackView.setChannels(2);
         mPlaybackView.setSampleRate(PlaybackThread.SAMPLE_RATE);
         mPlaybackView.setSamples(samples);
 
@@ -169,10 +169,7 @@ public class MainActivity extends AppCompatActivity {
             data = buffer.toByteArray();
         }
 
-        ShortBuffer sb = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
-        short[] samples = new short[sb.limit()];
-        sb.get(samples);
-        return samples;
+        return this.convertArrayByteToArrayShort(data);
     }
 
     public short[] convertArrayByteToArrayShort(byte[] data) {
