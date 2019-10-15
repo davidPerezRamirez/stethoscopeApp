@@ -14,8 +14,19 @@
 
 package com.newventuresoftware.waveform.utils;
 
+import java.math.BigInteger;
+
 public final class AudioUtils {
     public static int calculateAudioLength(int samplesCount, int sampleRate, int channelCount) {
-        return ((samplesCount / channelCount) * 1000) / sampleRate;
+
+        BigInteger miliseconds = BigInteger.valueOf(1000);
+        BigInteger samples = BigInteger.valueOf(samplesCount);
+        BigInteger channels = BigInteger.valueOf(channelCount);
+        BigInteger rate = BigInteger.valueOf(sampleRate);
+
+        BigInteger aux = (samples.divide(channels)).multiply(miliseconds);
+        BigInteger resultado = aux.divide(rate);
+
+        return resultado.intValue();
     }
 }
