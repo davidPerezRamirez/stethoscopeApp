@@ -14,7 +14,10 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.newventuresoftware.waveform.utils.*;
+import com.newventuresoftware.waveform.utils.AudioUtils;
+import com.newventuresoftware.waveform.utils.HeartRate;
+import com.newventuresoftware.waveform.utils.SamplingUtils;
+import com.newventuresoftware.waveform.utils.TextUtils;
 
 import java.util.LinkedList;
 
@@ -172,7 +175,6 @@ public class WaveformView extends View {
     }
 
     /**
-     *
      * @return = duration of audio in miliseconds
      */
     public int getAudioLength() {
@@ -198,7 +200,7 @@ public class WaveformView extends View {
     }
 
     public boolean showTextAxis() {
-         return showTextAxis;
+        return showTextAxis;
     }
 
     public void setShowTextAxis(boolean showTextAxis) {
@@ -268,7 +270,7 @@ public class WaveformView extends View {
         float max = Short.MAX_VALUE;
 
         short[][] extremes = SamplingUtils.getExtremes(buffer, width);
-
+        HeartRate heartRate = new HeartRate(mAudioLength);
 
         waveformPath.moveTo(0, centerY);
 
@@ -277,6 +279,10 @@ public class WaveformView extends View {
             short sample = extremes[x][0];
             float y = centerY - ((sample / max) * centerY);
             waveformPath.lineTo(x, y);
+
+            if (Math.abs(sample) > 220) {
+                heartRate.savePulse(sample);
+            }
         }
 
         // draw minimums
@@ -319,7 +325,7 @@ public class WaveformView extends View {
         float xStep = width / (mAudioLength / 1000f);
         float textHeight = mTextPaint.getTextSize();
         float textWidth = mTextPaint.measureText("10.00");
-        int secondStep = (int)(textWidth * seconds * 2) / width;
+        int secondStep = (int) (textWidth * seconds * 2) / width;
         secondStep = Math.max(secondStep, 1);
         for (float i = 0; i <= seconds; i += secondStep) {
             canvas.drawText(String.format("%.2f", i), i * xStep, textHeight, mTextPaint);
