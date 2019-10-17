@@ -2,8 +2,17 @@ package com.newventuresoftware.waveform.utils;
 
 import java.util.Arrays;
 
-public final class SamplingUtils {
-    public static short[][] getExtremes(short[] data, int sampleSize) {
+public class SamplingUtils {
+
+    private short[] data;
+    private int sampleSize;
+
+    public SamplingUtils(short[] data, int sampleSize) {
+        this.data = data;
+        this.sampleSize = sampleSize;
+    }
+
+    public short[][] getExtremes() {
         short[][] newData = new short[sampleSize][];
         int groupSize = data.length / sampleSize;
 
@@ -21,5 +30,31 @@ public final class SamplingUtils {
         }
 
         return newData;
+    }
+
+    public short[] getMaxExtremes() {
+        short[][] extremes = this.getExtremes();
+        short[] maxExtremes = new short[sampleSize];
+
+        for (int x = 0; x < sampleSize; x++) {
+            short sample = extremes[x][0];
+
+            maxExtremes[x] = sample;
+        }
+
+        return  maxExtremes;
+    }
+
+    public short[] getMinExtremes() {
+        short[][] extremes = this.getExtremes();
+        short[] minExtremes = new short[sampleSize];
+
+        for (int x = sampleSize - 1; x >= 0; x--) {
+            short sample = extremes[x][1];
+
+            minExtremes[x] = sample;
+        }
+
+        return  minExtremes;
     }
 }

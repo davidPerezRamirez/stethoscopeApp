@@ -46,6 +46,7 @@ public class WaveformView extends View {
     private Bitmap mCachedWaveformBitmap;
     private int colorDelta = 255 / (HISTORY_SIZE + 1);
     private boolean showTextAxis = true;
+    private SamplingUtils samplingUtils;
 
     public WaveformView(Context context) {
         super(context);
@@ -267,34 +268,39 @@ public class WaveformView extends View {
     Path drawPlaybackWaveform(int width, int height, short[] buffer) {
         Path waveformPath = new Path();
         float centerY = height / 2f;
-        float max = Short.MAX_VALUE;
+        this.samplingUtils = new SamplingUtils(buffer, width);
 
-        short[][] extremes = SamplingUtils.getExtremes(buffer, width);
-        HeartRate heartRate = new HeartRate(mAudioLength);
+        //HeartRate heartRate = new HeartRate(mAudioLength);
 
         waveformPath.moveTo(0, centerY);
+        this.drawMaximuns(this.samplingUtils.getMaxExtremes(), waveformPath);
+        this.drawMinimuns(this.samplingUtils.getMinExtremes(), waveformPath);
 
-        // draw maximums
-        for (int x = 0; x < width; x++) {
-            short sample = extremes[x][0];
-            float y = centerY - ((sample / max) * centerY);
-            waveformPath.lineTo(x, y);
-
-            if (Math.abs(sample) > 220) {
-                heartRate.savePulse(sample);
-            }
-        }
-
-        // draw minimums
-        for (int x = width - 1; x >= 0; x--) {
-            short sample = extremes[x][1];
-            float y = centerY - ((sample / max) * centerY);
-            waveformPath.lineTo(x, y);
-        }
+        /*int ppm = heartRate.calculateHeartRate();*/
 
         waveformPath.close();
 
         return waveformPath;
+    }
+
+    private void drawMinimuns(short[] minExtremes, Path waveformPath) {
+        float max = Short.MAX_VALUE;
+
+        for (int x = minExtremes.length - 1; x >= 0; x--) {
+            short sample = minExtremes[x];
+            float y = centerY - ((sample / max) * centerY);
+            waveformPath.lineTo(x, y);
+        }
+    }
+
+    private void drawMaximuns(short[] maxExtremes, Path waveformPath) {
+        float max = Short.MAX_VALUE;
+
+        for (int x = 0; x < maxExtremes.length; x++) {
+            short sample = maxExtremes[x];
+            float y = centerY - ((sample / max) * centerY);
+            waveformPath.lineTo(x, y);
+        }
     }
 
     private void createPlaybackWaveform() {
