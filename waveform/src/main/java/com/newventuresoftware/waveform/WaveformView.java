@@ -14,7 +14,9 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.newventuresoftware.waveform.utils.*;
+import com.newventuresoftware.waveform.utils.AudioUtils;
+import com.newventuresoftware.waveform.utils.SamplingUtils;
+import com.newventuresoftware.waveform.utils.TextUtils;
 
 import java.util.LinkedList;
 
@@ -43,6 +45,7 @@ public class WaveformView extends View {
     private Bitmap mCachedWaveformBitmap;
     private int colorDelta = 255 / (HISTORY_SIZE + 1);
     private boolean showTextAxis = true;
+    private SamplingUtils samplingUtils;
 
     public WaveformView(Context context) {
         super(context);
@@ -172,7 +175,6 @@ public class WaveformView extends View {
     }
 
     /**
-     *
      * @return = duration of audio in miliseconds
      */
     public int getAudioLength() {
@@ -198,7 +200,7 @@ public class WaveformView extends View {
     }
 
     public boolean showTextAxis() {
-         return showTextAxis;
+        return showTextAxis;
     }
 
     public void setShowTextAxis(boolean showTextAxis) {
@@ -265,30 +267,34 @@ public class WaveformView extends View {
     Path drawPlaybackWaveform(int width, int height, short[] buffer) {
         Path waveformPath = new Path();
         float centerY = height / 2f;
-        float max = Short.MAX_VALUE;
-
-        short[][] extremes = SamplingUtils.getExtremes(buffer, width);
-
+        this.samplingUtils = new SamplingUtils(buffer, width);
 
         waveformPath.moveTo(0, centerY);
-
-        // draw maximums
-        for (int x = 0; x < width; x++) {
-            short sample = extremes[x][0];
-            float y = centerY - ((sample / max) * centerY);
-            waveformPath.lineTo(x, y);
-        }
-
-        // draw minimums
-        for (int x = width - 1; x >= 0; x--) {
-            short sample = extremes[x][1];
-            float y = centerY - ((sample / max) * centerY);
-            waveformPath.lineTo(x, y);
-        }
-
+        this.drawMaximuns(this.samplingUtils.getMaxExtremes(), waveformPath);
+        this.drawMinimuns(this.samplingUtils.getMinExtremes(), waveformPath);
         waveformPath.close();
 
         return waveformPath;
+    }
+
+    private void drawMinimuns(short[] minExtremes, Path waveformPath) {
+        float max = Short.MAX_VALUE;
+
+        for (int x = minExtremes.length - 1; x >= 0; x--) {
+            short sample = minExtremes[x];
+            float y = centerY - ((sample / max) * centerY);
+            waveformPath.lineTo(x, y);
+        }
+    }
+
+    private void drawMaximuns(short[] maxExtremes, Path waveformPath) {
+        float max = Short.MAX_VALUE;
+
+        for (int x = 0; x < maxExtremes.length; x++) {
+            short sample = maxExtremes[x];
+            float y = centerY - ((sample / max) * centerY);
+            waveformPath.lineTo(x, y);
+        }
     }
 
     private void createPlaybackWaveform() {
@@ -319,8 +325,9 @@ public class WaveformView extends View {
         float xStep = width / (mAudioLength / 1000f);
         float textHeight = mTextPaint.getTextSize();
         float textWidth = mTextPaint.measureText("10.00");
-        int secondStep = (int)(textWidth * seconds * 2) / width;
+        int secondStep = (int) (textWidth * seconds * 2) / width;
         secondStep = Math.max(secondStep, 1);
+
         for (float i = 0; i <= seconds; i += secondStep) {
             canvas.drawText(String.format("%.2f", i), i * xStep, textHeight, mTextPaint);
         }

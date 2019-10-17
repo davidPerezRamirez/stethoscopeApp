@@ -27,10 +27,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.newventuresoftware.waveform.WaveformView;
 import com.newventuresoftware.waveformdemo.listener.AudioDataReceivedListener;
 import com.newventuresoftware.waveformdemo.listener.PlaybackListener;
+import com.newventuresoftware.waveformdemo.model.HeartRate;
 import com.newventuresoftware.waveformdemo.theard.PlaybackThread;
 import com.newventuresoftware.waveformdemo.theard.RecordingThread;
 
@@ -60,9 +63,14 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton fab;
     @BindView(R.id.playFab)
     FloatingActionButton playFab;
+    @BindView(R.id.tv_heartRate)
+    TextView tvHeartRate;
+    @BindView(R.id.rl_containerRecordAudio)
+    RelativeLayout containerRecordAudio;
 
     private RecordingThread mRecordingThread;
     private PlaybackThread mPlaybackThread;
+    private HeartRate heartRate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,12 +83,25 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onAudioDataReceived(byte[] data) {
                 short[] buffer = convertArrayByteToArrayShort(data);
+
                 mRealtimeWaveformView.setSamples(buffer);
             }
         });
-
+        this.updateTextViewHeartRate("0");
         this.initializeRecordButton();
         this.initializePlayRecord();
+    }
+
+    private void updateTextViewHeartRate(String heartRateString) {
+        tvHeartRate.setText(heartRateString + " ppm");
+    }
+
+    private void initializeHeartRate(short[] data, int audioLength) {
+        int samplesByGroup = 600;
+
+        this.heartRate = new HeartRate(data, audioLength, samplesByGroup);
+
+        updateTextViewHeartRate(String.valueOf(heartRate.calculateHeartRate()));
     }
 
     private void initializeRecordButton() {
@@ -110,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
         mPlaybackView.setChannels(2);
         mPlaybackView.setSampleRate(PlaybackThread.SAMPLE_RATE);
         mPlaybackView.setSamples(samples);
+        this.initializeHeartRate(samples, mPlaybackView.getAudioLength());
 
         playFab.setOnClickListener(new View.OnClickListener() {
             @Override
