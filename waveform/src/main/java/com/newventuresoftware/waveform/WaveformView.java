@@ -15,7 +15,6 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.newventuresoftware.waveform.utils.AudioUtils;
-import com.newventuresoftware.waveform.utils.HeartRate;
 import com.newventuresoftware.waveform.utils.SamplingUtils;
 import com.newventuresoftware.waveform.utils.TextUtils;
 

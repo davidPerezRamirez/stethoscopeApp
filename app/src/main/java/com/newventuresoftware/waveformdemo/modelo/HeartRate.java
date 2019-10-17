@@ -1,34 +1,32 @@
-package com.newventuresoftware.waveform.utils;
+package com.newventuresoftware.waveformdemo.modelo;
+
+import com.newventuresoftware.waveformdemo.repository.PulseRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class HeartRate {
 
-    private List<Integer> pulses;
+    private static final int DELTA_MIN_VALUE_PULSE = 220;
+
+    private short[] pulses;
     private Integer audioLength;
 
-    public HeartRate(int audioLength) {
-        this.pulses = new ArrayList<>();
+    public HeartRate(short[] pulses, int audioLength, int samplesSize) {
+
+        PulseRepository pulseRepository = new PulseRepository(pulses, samplesSize);
+        this.pulses = pulseRepository.getPulsesWithLowPassFilter(DELTA_MIN_VALUE_PULSE);
         this.audioLength = audioLength;
     }
 
-    public void savePulse(short pulse) {
-
-        int intPulse = Math.abs(pulse);
-
-        this.pulses.add(intPulse);
-    }
-
     private int averagePulse() {
-
         int sumatoria = 0;
 
         for (int pulse : this.pulses) {
             sumatoria += pulse;
         }
 
-        return sumatoria / this.pulses.size();
+        return sumatoria / this.pulses.length;
     }
 
     private int getCantMaxPulses() {
@@ -59,51 +57,48 @@ public class HeartRate {
         return (int) (heartRate);
     }
 
-    private List<Integer> getMaxPulses() {
+    private short[] getMaxPulses() {
         int average = this.averagePulse();
         int desviacionStandard = this.getStartDeviation() / 2;
-        List<Integer> maximos = new ArrayList<>();
+        List<Short> maximos = new ArrayList<>();
+        short[] arrayMaximos;
 
-        for (int pulse : this.pulses) {
+        for (short pulse : this.pulses) {
             if (pulse >= (average - desviacionStandard) && pulse <= (average + desviacionStandard)) {
                 maximos.add(pulse);
             }
         }
 
-        return maximos;
-    }
-
-    public int getStartDeviation() {
-        double sum = 0;
-        double finalsum = 0;
-        double average = 0;
-
-        for (double i : this.pulses) {
-            finalsum = (sum += i);
+        arrayMaximos = new short[maximos.size()];
+        for (int i=0; i < maximos.size(); i++) {
+            arrayMaximos[i] = maximos.get(i);
         }
 
-        average = finalsum / (this.pulses.size());
-        System.out.println("Average: " + average);
+        return arrayMaximos;
+    }
 
+    private int getStartDeviation() {
+        double average;
         double sumX = 0;
         double finalsumX = 0;
+        Double AverageX;
+        Double SquareRoot;
         double[] x1_average = new double[2000];
-        for (int i = 0; i < this.pulses.size(); i++) {
-            double fvalue = (Math.pow((this.pulses.get(i) - average), 2));
+
+        average = this.averagePulse();
+        System.out.println("Average: " + average);
+        for (int i = 0; i < this.pulses.length; i++) {
+            double fvalue = (Math.pow((this.pulses[i] - average), 2));
             x1_average[i] = fvalue;
             System.out.println("test: " + fvalue);
         }
-
         for (double i : x1_average) {
             finalsumX = (sumX += i);
         }
-
-        Double AverageX = finalsumX / (this.pulses.size());
-
-        Double SquareRoot = Math.sqrt(AverageX);
+        AverageX = finalsumX / (this.pulses.length);
+        SquareRoot = Math.sqrt(AverageX);
 
         return SquareRoot.intValue();
-
     }
 
 }
