@@ -23,7 +23,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,9 +31,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.newventuresoftware.waveform.WaveformView;
-import com.newventuresoftware.waveformdemo.modelo.HeartRate;
 import com.newventuresoftware.waveformdemo.listener.AudioDataReceivedListener;
 import com.newventuresoftware.waveformdemo.listener.PlaybackListener;
+import com.newventuresoftware.waveformdemo.model.HeartRate;
 import com.newventuresoftware.waveformdemo.theard.PlaybackThread;
 import com.newventuresoftware.waveformdemo.theard.RecordingThread;
 

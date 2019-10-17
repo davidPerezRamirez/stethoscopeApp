@@ -1,4 +1,4 @@
-package com.newventuresoftware.waveformdemo.modelo;
+package com.newventuresoftware.waveformdemo.model;
 
 import com.newventuresoftware.waveformdemo.repository.PulseRepository;
 
