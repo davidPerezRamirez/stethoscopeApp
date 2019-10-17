@@ -70,7 +70,7 @@ public class HeartRate {
         }
 
         arrayMaximos = new short[maximos.size()];
-        for (int i=0; i < maximos.size(); i++) {
+        for (int i = 0; i < maximos.size(); i++) {
             arrayMaximos[i] = maximos.get(i);
         }
 

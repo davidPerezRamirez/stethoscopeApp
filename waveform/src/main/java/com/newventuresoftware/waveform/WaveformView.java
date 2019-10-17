@@ -269,14 +269,9 @@ public class WaveformView extends View {
         float centerY = height / 2f;
         this.samplingUtils = new SamplingUtils(buffer, width);
 
-        //HeartRate heartRate = new HeartRate(mAudioLength);
-
         waveformPath.moveTo(0, centerY);
         this.drawMaximuns(this.samplingUtils.getMaxExtremes(), waveformPath);
         this.drawMinimuns(this.samplingUtils.getMinExtremes(), waveformPath);
-
-        /*int ppm = heartRate.calculateHeartRate();*/
-
         waveformPath.close();
 
         return waveformPath;
@@ -332,6 +327,7 @@ public class WaveformView extends View {
         float textWidth = mTextPaint.measureText("10.00");
         int secondStep = (int) (textWidth * seconds * 2) / width;
         secondStep = Math.max(secondStep, 1);
+
         for (float i = 0; i <= seconds; i += secondStep) {
             canvas.drawText(String.format("%.2f", i), i * xStep, textHeight, mTextPaint);
         }
