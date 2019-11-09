@@ -10,6 +10,8 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class ConvertidorAudioAArray {
 	
+	private static final float FRECUENCY_RESAMPLING = 600.0f;
+
 	private static final String PULSACIONES_TEST_WAV = "c:/Users/David/Desktop/pulsacion-test.wav";
 	
 	private String fileName;
@@ -18,15 +20,34 @@ public class ConvertidorAudioAArray {
 		this.fileName = fileNameAudio;
 	}
 
-	public short[] convertirAudio() throws UnsupportedAudioFileException, IOException {
-		File myFile = new File(PULSACIONES_TEST_WAV);
+	public short[] convertir() throws UnsupportedAudioFileException, IOException {
+		File inputFile = new File(this.fileName);
+		File outputFile = new File(PULSACIONES_TEST_WAV);
+		AudioInputStream stream = null;
+
+		try {
+			
+            stream = AudioSystem.getAudioInputStream(inputFile);
+            stream = convertSampleRate(FRECUENCY_RESAMPLING, stream);
+            AudioSystem.write(stream, AudioFileFormat.Type.WAVE, outputFile);
+            stream = AudioSystem.getAudioInputStream(outputFile);
+            
+        } catch (UnsupportedAudioFileException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+		return this.obtenerAudioComoArray(stream);
+	}
+	
+	private short[] obtenerAudioComoArray(AudioInputStream inputStream) throws IOException {
 		byte[] samples;
 
-		AudioInputStream is = AudioSystem.getAudioInputStream(myFile);
-		DataInputStream dis = new DataInputStream(is);
+		DataInputStream dis = new DataInputStream(inputStream);
 		try {
-		    AudioFormat format = is.getFormat();
-		    samples = new byte[(int)(is.getFrameLength() * format.getFrameSize())];
+		    AudioFormat format = inputStream.getFormat();
+		    samples = new byte[(int)(inputStream.getFrameLength() * format.getFrameSize())];
 		    dis.readFully(samples);
 		}
 		finally {
@@ -36,32 +57,15 @@ public class ConvertidorAudioAArray {
 		return ConvertidorByteArray.toShortArray(samples);
 	}
 	
-	public void remuestrearAudio() {
-		File inputFile = new File(this.fileName);
-		File outputFile = new File(PULSACIONES_TEST_WAV);
-        AudioInputStream stream=null;
-
-        try {
-            stream=AudioSystem.getAudioInputStream(inputFile);
-            stream = convertSampleRate(600.0f, stream);
-
-            AudioSystem.write(stream, AudioFileFormat.Type.WAVE, outputFile);
-        } catch (UnsupportedAudioFileException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-	}
-	
-	public AudioInputStream convertSampleRate(float fSampleRate,AudioInputStream sourceStream)
-    {
+	private AudioInputStream convertSampleRate(float fSampleRate,AudioInputStream sourceStream) {
         AudioFormat sourceFormat = sourceStream.getFormat();
         AudioFormat targetFormat = new AudioFormat(sourceFormat.getEncoding(),
         		fSampleRate,
         		sourceFormat.getSampleSizeInBits(),
         		sourceFormat.getChannels(),
         		sourceFormat.getFrameSize(),
-        		fSampleRate,sourceFormat.isBigEndian()
+        		fSampleRate,
+        		sourceFormat.isBigEndian()
         );
         
         return AudioSystem.getAudioInputStream(targetFormat,sourceStream);

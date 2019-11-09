@@ -14,12 +14,13 @@ public class Main {
 		
 		try {
 			/* Obtiene audio, remuestrea, lo convierte en un array y lo guarda en un archivo */
+			
 			convertidorAudioAArray = new ConvertidorAudioAArray(PULSACIONES_WAV);
-			convertidorAudioAArray.remuestrearAudio();
-			short[] audio = convertidorAudioAArray.convertirAudio();
+			short[] audio = convertidorAudioAArray.convertir();
 			guadarEnArchivos(audio);
 			
 			/* Calcular las ppm en base al array obtenido */
+			
 			contador = new ContadorDePulsosMedianteCorrelacion(audio, 14);
 			cantidadDeMuestrasEntreMaximos = contador.obtenerCantidadDeMuestrasEntreMaximos();
 			
@@ -35,7 +36,7 @@ public class Main {
 		BufferedWriter writer = new BufferedWriter(new FileWriter("c:/Users/David/Desktop/pulsacion-test.txt"));
 		
 		for (int i = 0; i < audio.length; i++) {
-			String value = String.format("%d", audio[i]);
+			String value = String.valueOf(audio[i]);
 			
 			writer.write(value);
 			writer.newLine();
