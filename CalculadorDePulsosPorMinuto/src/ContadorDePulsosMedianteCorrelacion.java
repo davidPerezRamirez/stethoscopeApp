@@ -4,15 +4,15 @@ import java.util.List;
 public class ContadorDePulsosMedianteCorrelacion {
 
 	private static final Integer UN_SEGUNDO_EN_MILISEGUNDOS = 60000;
-	public double[] samples;
+	public short[] samples;
 	public int tiempoDeMuestras;
 
-	public ContadorDePulsosMedianteCorrelacion(double[] pulsos, int tiempoDeAudio) {
+	public ContadorDePulsosMedianteCorrelacion(short[] pulsos, int tiempoDeAudio) {
 		this.samples = pulsos;
 		this.tiempoDeMuestras = tiempoDeAudio;
 	}
 
-	public ContadorDePulsosMedianteCorrelacion() {
+	/*public ContadorDePulsosMedianteCorrelacion() {
 		//this.samples = InformacionPulsos.pulsos;
 		this.tiempoDeMuestras = 1000;
 		double[] examples = InformacionPulsos.pulsos;
@@ -25,8 +25,7 @@ public class ContadorDePulsosMedianteCorrelacion {
 				samples[i] = examples[i];
 			}
 		}
-
-	}
+	}*/
 	
 	public int calcularPulsosPorMinuto() {
 		double cantMuestrasPorMsec = (double)(this.tiempoDeMuestras / samples.length);
@@ -52,7 +51,7 @@ public class ContadorDePulsosMedianteCorrelacion {
 	
 	private double[] calcularCorrelaciones() {
 		double[] correlations = new double[samples.length];
-		double[] offsetSamples;
+		short[] offsetSamples;
 
 		for (int i = 0; i < samples.length; i++) {
 			offsetSamples = this.getOffsetSamplesArray(i, samples);
@@ -87,7 +86,7 @@ public class ContadorDePulsosMedianteCorrelacion {
 		return offsets;
 	}
 
-	private double calculateCorrelation(double[] samples, double[] offsetSamples) {
+	private double calculateCorrelation(short[] samples, short[] offsetSamples) {
 		double sumatoria = 0;
 
 		for (int i = 0; i < samples.length; i++) {
@@ -97,8 +96,8 @@ public class ContadorDePulsosMedianteCorrelacion {
 		return sumatoria;
 	}
 
-	private double[] getOffsetSamplesArray(int offset, double[] samples) {
-		double[] offsetSamples = new double[samples.length];
+	private short[] getOffsetSamplesArray(int offset, short[] samples) {
+		short[] offsetSamples = new short[samples.length];
 
 		for (int i = 0; i < offset; i++) {
 			offsetSamples[i] = 0;
