@@ -2,15 +2,26 @@ import java.nio.ByteBuffer;
 
 public class ConvertidorByteArray {
 
+	private static final int VALOR_FILTRO_PASA_ALTOS = 4500;
+
+	/**
+	 * PRE: Se recibe un array de byte que representa un audio grabado en 2 canales (izq y derecho)
+	 * POST: Se obtiene un array de double que representa las muestras del audio del canal izquierdo 
+	 */
 	public static double[] toDoubleArray(byte[] byteArray){
-	    int times = Double.SIZE / Byte.SIZE;
-	    double[] doubles = new double[byteArray.length / times];
-	    
-	    for(int i=0;i<doubles.length;i++){
-	        doubles[i] = ByteBuffer.wrap(byteArray, i*times, times).getDouble();
-	    }
-	    
-	    return doubles;
+		double[] samples = new double[byteArray.length]; 
+		
+		for (int i =0; i < byteArray.length; i += 4) {
+		    double left = (double)((byteArray [i] & 0xff) | (byteArray[i + 1] << 8));
+
+		    if (left > VALOR_FILTRO_PASA_ALTOS) {
+		    	samples[i] = left;
+		    } else {
+		    	samples[i] = 0.0;
+		    }
+		}
+		
+		return samples;
 	}
 	
 	public static int[] toIntArray(byte[] byteArray){

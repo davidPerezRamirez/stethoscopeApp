@@ -10,7 +10,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class ConvertidorAudioAArray {
 	
-	private static final float FRECUENCY_RESAMPLING = 600.0f;
+	private static final float FRECUENCY_RESAMPLING = 300.0f;
 
 	private static final String PULSACIONES_TEST_WAV = "c:/Users/David/Desktop/pulsacion-test.wav";
 	
@@ -20,7 +20,7 @@ public class ConvertidorAudioAArray {
 		this.fileName = fileNameAudio;
 	}
 
-	public short[] convertir() throws UnsupportedAudioFileException, IOException {
+	public double[] convertir() throws UnsupportedAudioFileException, IOException {
 		File inputFile = new File(this.fileName);
 		File outputFile = new File(PULSACIONES_TEST_WAV);
 		AudioInputStream stream = null;
@@ -41,7 +41,7 @@ public class ConvertidorAudioAArray {
 		return this.obtenerAudioComoArray(stream);
 	}
 	
-	private short[] obtenerAudioComoArray(AudioInputStream inputStream) throws IOException {
+	private double[] obtenerAudioComoArray(AudioInputStream inputStream) throws IOException {
 		byte[] samples;
 
 		DataInputStream dis = new DataInputStream(inputStream);
@@ -54,7 +54,7 @@ public class ConvertidorAudioAArray {
 		    dis.close();
 		}
 		
-		return ConvertidorByteArray.toShortArray(samples);
+		return ConvertidorByteArray.toDoubleArray(samples);
 	}
 	
 	private AudioInputStream convertSampleRate(float fSampleRate,AudioInputStream sourceStream) {

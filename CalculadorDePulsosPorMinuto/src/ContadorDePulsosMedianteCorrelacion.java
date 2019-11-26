@@ -4,10 +4,10 @@ import java.util.List;
 public class ContadorDePulsosMedianteCorrelacion {
 
 	private static final Integer UN_SEGUNDO_EN_MILISEGUNDOS = 60000;
-	public short[] samples;
+	public double[] samples;
 	public int tiempoDeMuestras;
 
-	public ContadorDePulsosMedianteCorrelacion(short[] pulsos, int tiempoDeAudio) {
+	public ContadorDePulsosMedianteCorrelacion(double[] pulsos, int tiempoDeAudio) {
 		this.samples = pulsos;
 		this.tiempoDeMuestras = tiempoDeAudio;
 	}
@@ -28,9 +28,9 @@ public class ContadorDePulsosMedianteCorrelacion {
 	}*/
 	
 	public int calcularPulsosPorMinuto() {
-		double cantMuestrasPorMsec = (double)(this.tiempoDeMuestras / samples.length);
-		int cantidadDeMuestrasEnterMaximos = this.obtenerCantidadDeMuestrasEntreMaximos();
-		double tiempoEntrePicosMaximos = cantidadDeMuestrasEnterMaximos * cantMuestrasPorMsec; 
+		double cantMuestrasPorMseg = (double)(samples.length) / (this.tiempoDeMuestras * 1000);
+		int cantidadDeMuestrasEntreMaximos = this.obtenerCantidadDeMuestrasEntreMaximos();
+		double tiempoEntrePicosMaximos = cantidadDeMuestrasEntreMaximos * cantMuestrasPorMseg; 
 		
 		return (int) (UN_SEGUNDO_EN_MILISEGUNDOS/tiempoEntrePicosMaximos);		
 	}
@@ -51,7 +51,7 @@ public class ContadorDePulsosMedianteCorrelacion {
 	
 	private double[] calcularCorrelaciones() {
 		double[] correlations = new double[samples.length];
-		short[] offsetSamples;
+		double[] offsetSamples;
 
 		for (int i = 0; i < samples.length; i++) {
 			offsetSamples = this.getOffsetSamplesArray(i, samples);
@@ -86,7 +86,7 @@ public class ContadorDePulsosMedianteCorrelacion {
 		return offsets;
 	}
 
-	private double calculateCorrelation(short[] samples, short[] offsetSamples) {
+	private double calculateCorrelation(double[] samples, double[] offsetSamples) {
 		double sumatoria = 0;
 
 		for (int i = 0; i < samples.length; i++) {
@@ -96,8 +96,8 @@ public class ContadorDePulsosMedianteCorrelacion {
 		return sumatoria;
 	}
 
-	private short[] getOffsetSamplesArray(int offset, short[] samples) {
-		short[] offsetSamples = new short[samples.length];
+	private double[] getOffsetSamplesArray(int offset, double[] samples) {
+		double[] offsetSamples = new double[samples.length];
 
 		for (int i = 0; i < offset; i++) {
 			offsetSamples[i] = 0;
